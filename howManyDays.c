@@ -17,7 +17,7 @@ int getDaysInMonth (int month, int year) {
             break;
 
         case 2:
-            if (year % 4 == 0 && (!year % 100 == 0 || year % 400 == 0)) {
+            if (year % 4 == 0 && (year % 400 == 0 || !(year % 100 == 0))) {
                 return 29;
             }
             else {
@@ -151,6 +151,8 @@ void displayCurrentDate (Date currentDate) {
 }
 
 int howManyDays() {
+    int fridays = 0;
+
     Date currentDate;
     currentDate.year = 1801;
     currentDate.month = 1;
@@ -158,11 +160,15 @@ int howManyDays() {
     currentDate.daysFromStart = calculateDaysFromStart(currentDate);
 
     while(currentDate.year < 2001) {
-        displayCurrentDate(currentDate);
+        if (getWeekday(currentDate) == 4) {
+            displayCurrentDate(currentDate);
+            fridays += 1;
+        }
         currentDate = advanceMonth(currentDate);
     }
     
-    return 0;
+    printf("%d", fridays);
+    return fridays;
 }
 
 int main() {
