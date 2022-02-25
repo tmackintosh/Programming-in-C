@@ -79,7 +79,7 @@ int calculateDaysFromStart (Date currentDate) {
     int leapYears = (deltaYear) / 4;
     daysFromStart += leapYears;
 
-    if (currentDate.year >= 2000) {
+    if (currentDate.year > 1900) {
         daysFromStart -= 1;
     }
 
