@@ -50,6 +50,8 @@ void removeDigit(int x, int n, int* a_ptr, int* b_ptr){
             return;
         }
 
+        // This could be improved by incrementing for the digit that contained
+        // x, for example 321 contains a 3, so we increment by 100 to remove the 3
         a -= 1;
         b += 1;
     }
