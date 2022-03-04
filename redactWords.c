@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 void get_redacted_words(char redacted_words[], const char* redact_words_filename) {
     FILE* redacted_words_stream = fopen(redact_words_filename, "r");
@@ -16,7 +17,7 @@ void get_redacted_words(char redacted_words[], const char* redact_words_filename
 
             if (character == ',') {
                 character = '\0';
-            } else if (character == ' ') {
+            } else if (!isalpha(character)) {
                 continue;
             }
 
@@ -55,6 +56,15 @@ bool redact_individual_word(char word[], int word_length, char redacted_words[],
     return false;
 }
 
+void redact(char* buffer, char* word, int word_length, char* redacted_words, int number_of_read_bytes, int starting_index) {
+    printf("%s %d\n", word, word_length);
+    if (redact_individual_word(word, word_length, redacted_words, number_of_read_bytes)) {
+        for (int j = 0; j < word_length; j++) {
+            buffer[starting_index + j] = '*';
+        }
+    };
+}
+
 void redact_line(char buffer[], int number_of_read_bytes, char redacted_words[]) {
     int starting_index = 0;
     int ending_index = -1;
@@ -65,20 +75,14 @@ void redact_line(char buffer[], int number_of_read_bytes, char redacted_words[])
 
         if (character == ' ') {
             ending_index = i;
-
-            if (redact_individual_word(substring, ending_index - starting_index, redacted_words, number_of_read_bytes)) {
-                for (int j = 0; j < ending_index - starting_index; j++) {
-                    buffer[starting_index + j] = '*';
-                }
-            };
-
+            redact(buffer, substring, ending_index - starting_index, redacted_words, number_of_read_bytes, starting_index);
             starting_index = ending_index + 1;
         } else {
             substring[i - ending_index - 1] = tolower(character);
         }
     }
 
-    redact_individual_word(substring, number_of_read_bytes - starting_index, redacted_words, number_of_read_bytes);
+    redact(buffer, substring, number_of_read_bytes - starting_index, redacted_words, number_of_read_bytes, starting_index);
 }
 
 void redact_words(const char *text_filename, const char *redact_words_filename){
@@ -105,10 +109,19 @@ void redact_words(const char *text_filename, const char *redact_words_filename){
 }
 
 int main() {
-    char* input_name = "input_file.txt";
-    char* redact_words_filename = "redacted_words.txt";
+    const char *input_file = "input_file.txt";
+    const char *redact_file = "redacted_words.txt";
+    redact_words(input_file, redact_file);
 
-    redact_words(input_name, redact_words_filename);
-
-    return 0;
+    char line[1024];
+    FILE* file = fopen("result.txt", "r");
+    if(!file){
+        printf("Unable to open result.txt\n");
+    }
+    else{
+        while (fgets(line, sizeof(line), file)) {
+            printf("%s", line);
+        }
+        fclose(file);
+    }
 }
