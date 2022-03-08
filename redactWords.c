@@ -58,7 +58,13 @@ bool is_word_redacted(char word[], int word_length, char redacted_words[], int r
 
         if (character == '\0') {
             if (cursor != 0 && memcmp(new_word, word, cursor) == 0) {
-                return true;
+                // We need to make sure the redacted word doesn't form the first
+                // part of the word by checking whether the word has been completed or
+                // not (ie the next letter is the escape character)
+                // For example, "password" isn't redacted by the word "pass"
+                if (cursor != word_length - 1 && new_word[cursor + 1] == '\0') {
+                    return true;
+                }
             }
 
             // Reset the cursor to restart writing to the next word
