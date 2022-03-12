@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 /* 
  *  A function which takes in a filename and returns the contents as a string, 
@@ -58,8 +59,39 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
 
     int key_length = strlen(key);
     int string_length = strlen(string);
-    printf("%d %d", key_length, string_length);
+    
+    // Treat the final output as a matrix
+    float message_rows = string_length / (float)key_length;
 
+    int rows = ceil(message_rows) + 1;
+    int columns = key_length + 1;
+
+    char* encrypted_string = (char *) malloc(rows * columns * sizeof(char));
+
+    for (int i = 0; i < key_length; i++) {
+        encrypted_string[i] = key[i];
+    }
+
+    int cursor = key_length;
+
+    for (int i = 0; i < string_length; i++) {
+        if (i % (key_length) == 0) {
+            encrypted_string[cursor] = '\n';
+            cursor++;
+        }
+
+        encrypted_string[cursor] = string[i];
+        cursor++;
+    }
+
+    for (int i = cursor; i < rows * columns; i++) {
+        encrypted_string[cursor] = 'X';
+    }
+
+    encrypted_string[rows * columns] = '\0';
+
+    result = &encrypted_string;
+    free(encrypted_string);
     free(string);
     free(key);
 }
@@ -78,5 +110,7 @@ int decrypt_columnar(const char *message_filename, const char *key_filename, cha
 int main() {
     char **result;
     encrypt_columnar("input_file.txt", "redacted_words.txt", result);
+    printf("%s", *result);
+    free(result);
     return EXIT_SUCCESS;
 }
