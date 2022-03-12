@@ -98,7 +98,6 @@ char* get_unsorted_string(char *key, char *string) {
 
 void swap_column(char *formatted_string, int key_length, int column1, int column2) {
     int columns = key_length + 1;
-    int rows = strlen(formatted_string) / columns;
 
     for (int i = 0; i < columns - 1; i++) {
         int index1 = (i * columns) + column1;
@@ -133,6 +132,26 @@ void columnar_transposition(char *formatted_string, char* key) {
     }
 }
 
+char* get_encrypted_text(char *formatted_string, int key_length) {
+    int columns = key_length + 1;
+    int rows = strlen(formatted_string) / columns;
+
+    char *new_string = (char *) malloc(columns * rows * sizeof(char));
+    int cursor = 0;
+    
+    for (int i = key_length; i < strlen(formatted_string); i++) {
+        char character = formatted_string[i];
+
+        if (character != '\n' && character != '\0') {
+            new_string[cursor] = character;
+            cursor++;
+        }
+    }
+
+    free(formatted_string);
+    return new_string;
+}
+
 /* 
  *  A function which takes in a filename and encrypts the contents using the
  *  key string which is obtained from the "key_filename" file. The encrypted 
@@ -145,8 +164,8 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
 
     char *formatted_string = get_unsorted_string(key, string);
     columnar_transposition(formatted_string, key);
+    *result = get_encrypted_text(formatted_string, strlen(key));
 
-    *result = formatted_string;
     free(string);
     free(key);
 }
@@ -159,12 +178,13 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
  *  should return true if decryption was successful, false if not.
  */
 int decrypt_columnar(const char *message_filename, const char *key_filename, char **result){
-    return 1;   
+    
 }
 
 int main() {
     char **result;
     encrypt_columnar("input_file.txt", "redacted_words.txt", result);
+    free(result);
     printf("%s", *result);
     return EXIT_SUCCESS;
 }
