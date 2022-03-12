@@ -45,6 +45,8 @@ char *read_string(const char *filename){
     } while (number_of_read_bytes > 0);
     
     final_string[cursor] = '\0';
+
+    fclose(input_stream);
     return final_string;
 }
 
@@ -55,7 +57,7 @@ char *read_string(const char *filename){
 // @param *key the string of the key
 // @param *string the string of the string to format
 // @returns the encoded string
-char* get_unsorted_string(char *key, char *string) {
+char* get_formatted_string(char *key, char *string) {
     int key_length = strlen(key);
     int string_length = strlen(string);
     
@@ -162,7 +164,7 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
     char *string = read_string(message_filename);
     char *key = read_string(key_filename);
 
-    char *formatted_string = get_unsorted_string(key, string);
+    char *formatted_string = get_formatted_string(key, string);
     columnar_transposition(formatted_string, key);
     *result = get_encrypted_text(formatted_string, strlen(key));
 
@@ -177,14 +179,29 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
  *  assume has not been initialised or any memory allocated to it. The function 
  *  should return true if decryption was successful, false if not.
  */
-int decrypt_columnar(const char *message_filename, const char *key_filename, char **result){
-    
+int decrypt_columnar(const char *message_filename, const char *key_filename, char **result) {
+    char *message = read_string(message_filename);
+    char *key = read_string(key_filename);
+
+    char *formatted_string = get_formatted_string(key, message);
+    printf("%s", formatted_string);
+
+    free(formatted_string);
+    free(message);
+    free(key);
 }
 
 int main() {
     char **result;
     encrypt_columnar("input_file.txt", "redacted_words.txt", result);
-    free(result);
     printf("%s", *result);
+
+    FILE *output_stream = fopen("result.txt", "w");
+    fwrite(*result, 1, strlen(*result), output_stream);
+    fclose(output_stream);
+    free(*result);
+
+    decrypt_columnar("input_file.txt", "redacted_words.txt", result);
+
     return EXIT_SUCCESS;
 }
