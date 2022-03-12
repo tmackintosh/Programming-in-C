@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 
 /* 
  *  A function which takes in a filename and returns the contents as a string, 
@@ -47,18 +48,28 @@ char *read_string(const char *filename){
     return final_string;
 }
 
+// Returns a formatted string in from:
+// KEY\n
+// ABC\n
+// DXX\0
+// @param *key the string of the key
+// @param *string the string of the string to format
+// @returns the encoded string
 char* get_unsorted_string(char *key, char *string) {
     int key_length = strlen(key);
     int string_length = strlen(string);
     
-    // Treat the final output as a matrix
+    // Treat the final output as a matrix with \n and \0 defining rows and columns
     float message_rows = string_length / (float)key_length;
 
+    // Add 1 for the escape or new line character
     int rows = ceil(message_rows) + 1;
+    // Add 1 for the key being put at the top
     int columns = key_length + 1;
 
     char* encrypted_string = (char *) malloc(rows * columns * sizeof(char));
 
+    // Add key onto the top row
     for (int i = 0; i < key_length; i++) {
         encrypted_string[i] = key[i];
     }
@@ -66,6 +77,7 @@ char* get_unsorted_string(char *key, char *string) {
     int cursor = key_length;
 
     for (int i = 0; i < string_length; i++) {
+        // Add new line characters where necessary
         if (i % (key_length) == 0) {
             encrypted_string[cursor] = '\n';
             cursor++;
@@ -75,12 +87,50 @@ char* get_unsorted_string(char *key, char *string) {
         cursor++;
     }
 
+    // Fill in Xs where necessary
     for (int i = cursor; i < rows * columns - 1; i++) {
-        encrypted_string[cursor] = 'X';
+        encrypted_string[i] = 'X';
     }
 
     encrypted_string[rows * columns] = '\0';
     return encrypted_string;
+}
+
+void swap_column(char *formatted_string, int key_length, int column1, int column2) {
+    int columns = key_length + 1;
+    int rows = strlen(formatted_string) / columns;
+
+    for (int i = 0; i < columns - 1; i++) {
+        int index1 = (i * columns) + column1;
+        int index2 = (i * columns) + column2;
+
+        char temp = formatted_string[index1];
+        formatted_string[index1] = formatted_string[index2];
+        formatted_string[index2] = temp;
+    }
+}
+
+void columnar_transposition(char *formatted_string, char* key) {
+    // Bubble sort the key, and swap the columns along with them
+    bool swapped = true;
+    int iterations = 0;
+
+    while (swapped) {
+        swapped = false;
+        iterations++;
+
+        for (int i = 0; i < strlen(key) - iterations; i++) {
+            char character = key[i];
+            char next_character = key[i + 1];
+
+            if (character > next_character) {
+                key[i] = next_character;
+                key[i + 1] = character;
+                swap_column(formatted_string, strlen(key), i, i + 1);
+                swapped = true;
+            }
+        }
+    }
 }
 
 /* 
@@ -93,9 +143,10 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
     char *string = read_string(message_filename);
     char *key = read_string(key_filename);
 
-    char *encrypted_string = get_unsorted_string(key, string);
+    char *formatted_string = get_unsorted_string(key, string);
+    columnar_transposition(formatted_string, key);
 
-    *result = encrypted_string;
+    *result = formatted_string;
     free(string);
     free(key);
 }
@@ -115,6 +166,5 @@ int main() {
     char **result;
     encrypt_columnar("input_file.txt", "redacted_words.txt", result);
     printf("%s", *result);
-    free(result);
     return EXIT_SUCCESS;
 }
