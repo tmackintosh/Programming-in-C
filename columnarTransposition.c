@@ -47,16 +47,7 @@ char *read_string(const char *filename){
     return final_string;
 }
 
-/* 
- *  A function which takes in a filename and encrypts the contents using the
- *  key string which is obtained from the "key_filename" file. The encrypted 
- *  message should be returned using the "result" buffer, which you should 
- *  assume has not been initialised or any memory allocated to it.
- */
-void encrypt_columnar(const char *message_filename, const char *key_filename, char **result){
-    char *string = read_string(message_filename);
-    char *key = read_string(key_filename);
-
+char* get_unsorted_string(char *key, char *string) {
     int key_length = strlen(key);
     int string_length = strlen(string);
     
@@ -84,11 +75,25 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
         cursor++;
     }
 
-    for (int i = cursor; i < rows * columns; i++) {
+    for (int i = cursor; i < rows * columns - 1; i++) {
         encrypted_string[cursor] = 'X';
     }
 
     encrypted_string[rows * columns] = '\0';
+    return encrypted_string;
+}
+
+/* 
+ *  A function which takes in a filename and encrypts the contents using the
+ *  key string which is obtained from the "key_filename" file. The encrypted 
+ *  message should be returned using the "result" buffer, which you should 
+ *  assume has not been initialised or any memory allocated to it.
+ */
+void encrypt_columnar(const char *message_filename, const char *key_filename, char **result){
+    char *string = read_string(message_filename);
+    char *key = read_string(key_filename);
+
+    char *encrypted_string = get_unsorted_string(key, string);
 
     *result = encrypted_string;
     free(string);
