@@ -71,6 +71,11 @@ char* get_formatted_string(char *key, char *string) {
 
     char* encrypted_string = (char *) malloc(rows * columns * sizeof(char));
 
+    if (encrypted_string == NULL) {
+        printf("Dynamic memory allocation failed.");
+        return '\0';
+    }
+
     // Add key onto the top row
     for (int i = 0; i < key_length; i++) {
         encrypted_string[i] = key[i];
@@ -94,7 +99,7 @@ char* get_formatted_string(char *key, char *string) {
         encrypted_string[i] = 'X';
     }
 
-    encrypted_string[rows * columns] = '\0';
+    encrypted_string[rows * columns - 1] = '\0';
     return encrypted_string;
 }
 
@@ -140,6 +145,11 @@ char* get_encrypted_text(char *formatted_string, int key_length) {
 
     char *new_string = (char *) malloc(columns * rows * sizeof(char));
     int cursor = 0;
+
+    if (new_string == NULL) {
+        printf("Dynamic memory allocation failed.");
+        return '\0';
+    }
     
     for (int i = key_length; i < strlen(formatted_string); i++) {
         char character = formatted_string[i];
@@ -149,6 +159,8 @@ char* get_encrypted_text(char *formatted_string, int key_length) {
             cursor++;
         }
     }
+
+    new_string[cursor] = '\0';
 
     free(formatted_string);
     return new_string;
@@ -180,28 +192,22 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
  *  should return true if decryption was successful, false if not.
  */
 int decrypt_columnar(const char *message_filename, const char *key_filename, char **result) {
-    char *message = read_string(message_filename);
-    char *key = read_string(key_filename);
-
-    char *formatted_string = get_formatted_string(key, message);
-    printf("%s", formatted_string);
-
-    free(formatted_string);
-    free(message);
-    free(key);
+    encrypt_columnar(message_filename, key_filename, result);
+    return 0;
 }
 
 int main() {
     char **result;
     encrypt_columnar("input_file.txt", "redacted_words.txt", result);
-    printf("%s", *result);
+    printf("%s\n", *result);
 
     FILE *output_stream = fopen("result.txt", "w");
     fwrite(*result, 1, strlen(*result), output_stream);
     fclose(output_stream);
-    free(*result);
 
-    decrypt_columnar("input_file.txt", "redacted_words.txt", result);
+    decrypt_columnar("result.txt", "redacted_words.txt", result);
+    printf("%s\n", *result);
+    free(*result);
 
     return EXIT_SUCCESS;
 }
