@@ -29,7 +29,7 @@ char *read_string(const char *filename){
         total_number_of_read_bytes += number_of_read_bytes;
 
         if (total_number_of_read_bytes != 1024) {
-            realloc(final_string, total_number_of_read_bytes);
+            final_string = realloc(final_string, total_number_of_read_bytes);
         }
 
         for (int i = 0; i < number_of_read_bytes; i++) {
@@ -90,8 +90,7 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
 
     encrypted_string[rows * columns] = '\0';
 
-    result = &encrypted_string;
-    free(encrypted_string);
+    *result = encrypted_string;
     free(string);
     free(key);
 }
