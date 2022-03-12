@@ -103,6 +103,11 @@ char* get_formatted_string(char *key, char *string) {
     return encrypted_string;
 }
 
+// Takes a formatted string and swaps the specified columns
+// @param char* formatted_string the formatted string to mutate
+// @param int key_length the length of the key to help define the string matrix
+// @param column1 the first column to swap
+// @param column2 the second column to swap
 void swap_column(char *formatted_string, int key_length, int column1, int column2) {
     int columns = key_length + 1;
 
@@ -116,6 +121,9 @@ void swap_column(char *formatted_string, int key_length, int column1, int column
     }
 }
 
+// Takes a formatted string and encrypts it using the key given
+// @param char* formatted_string the string to mutate
+// @param char* key the key to use for encryption
 void columnar_transposition(char *formatted_string, char* key) {
     // Bubble sort the key, and swap the columns along with them
     bool swapped = true;
@@ -139,6 +147,9 @@ void columnar_transposition(char *formatted_string, char* key) {
     }
 }
 
+// Takes a formatted string and extracts the ciphertext from it
+// @param formatted_string the string to extract from
+// @param key_length the length of the key to help determine string matrix
 char* get_encrypted_text(char *formatted_string, int key_length) {
     int columns = key_length + 1;
     int rows = strlen(formatted_string) / columns;
