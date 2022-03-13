@@ -30,7 +30,8 @@ char *read_string(const char *filename){
         total_number_of_read_bytes += number_of_read_bytes;
 
         if (total_number_of_read_bytes != 1024) {
-            final_string = realloc(final_string, total_number_of_read_bytes);
+            // Add an extra character so we can put the escape character at the end
+            final_string = realloc(final_string, total_number_of_read_bytes + sizeof(char));
         }
 
         for (int i = 0; i < number_of_read_bytes; i++) {
@@ -150,7 +151,7 @@ void columnar_transposition(char *formatted_string, char* key) {
 // Takes a formatted string and extracts the ciphertext from it
 // @param formatted_string the string to extract from
 // @param key_length the length of the key to help determine string matrix
-char* get_encrypted_text(char *formatted_string, int key_length) {
+void get_encrypted_text(char *formatted_string, int key_length, char **result) {
     int columns = key_length + 1;
     int rows = strlen(formatted_string) / columns;
 
@@ -159,7 +160,7 @@ char* get_encrypted_text(char *formatted_string, int key_length) {
 
     if (new_string == NULL) {
         printf("Dynamic memory allocation failed.");
-        return '\0';
+        return;
     }
     
     for (int i = key_length; i < strlen(formatted_string); i++) {
@@ -173,8 +174,8 @@ char* get_encrypted_text(char *formatted_string, int key_length) {
 
     new_string[cursor] = '\0';
 
+    *result = new_string;
     free(formatted_string);
-    return new_string;
 }
 
 /* 
@@ -189,7 +190,7 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
 
     char *formatted_string = get_formatted_string(key, string);
     columnar_transposition(formatted_string, key);
-    *result = get_encrypted_text(formatted_string, strlen(key));
+    get_encrypted_text(formatted_string, strlen(key), result);
 
     free(string);
     free(key);
@@ -204,11 +205,12 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
  */
 int decrypt_columnar(const char *message_filename, const char *key_filename, char **result) {
     encrypt_columnar(message_filename, key_filename, result);
-    return 0;
+    return 1;
 }
 
 int main() {
-    char **result;
+    char *string = "Hello";
+    char **result = &string;
     encrypt_columnar("input_file.txt", "redacted_words.txt", result);
     printf("%s\n", *result);
 
@@ -219,6 +221,7 @@ int main() {
     decrypt_columnar("result.txt", "redacted_words.txt", result);
     printf("%s\n", *result);
     free(*result);
+    free(result);
 
     return EXIT_SUCCESS;
 }
