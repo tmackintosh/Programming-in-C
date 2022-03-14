@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct node {
     char* name;
@@ -60,17 +61,31 @@ int insert_before(Node** head, const char* before, const char* newObj) {
     Node *nextNode;
 
     while (currentNode != NULL) {
-        if (currentNode -> name == before) {
-            insert_string(&currentNode, newObj);
-            return -1;
-        }
-
         nextNode = calculate_xor_value(previousNode, currentNode -> xor_value);
+
+        if (currentNode -> name == before) {
+            if (currentNode == *head) {
+                insert_string(head, newObj);
+                return true;
+            }
+
+            Node *newNode = make_new_node(newObj);
+            newNode -> xor_value = calculate_xor_value(previousNode, currentNode);
+
+            if (previousNode != NULL) {
+                Node *previousPreviousNode = calculate_xor_value(previousNode -> xor_value, currentNode);
+                previousNode -> xor_value = calculate_xor_value(previousPreviousNode, newNode);
+            }
+            
+            currentNode -> xor_value = calculate_xor_value(newNode, nextNode);
+
+            return true;
+        }
         previousNode = currentNode;
         currentNode = nextNode;
     }
 
-    return 0;
+    return false;
 }
 
 // If possible, inserts after the string "after" and returns true. Returns false if not possible (e.g., the after string is not in the list).
@@ -100,8 +115,10 @@ void free_all(Node** head) {
 
 int main () {
     Node *head = NULL;
-    insert_string(&head, "Alpha");
     insert_string(&head, "Charlie");
+    insert_string(&head, "Alpha");
     insert_before(&head, "Charlie", "Bravo");
+    insert_string(&head, "Alpha");
     print_list(head);
+    return 0;
 }
