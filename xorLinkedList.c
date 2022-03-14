@@ -1,5 +1,6 @@
 #include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 
 typedef struct node {
     char* name;
@@ -10,14 +11,30 @@ Node* calculate_xor_value(Node* before, Node* after) {
     return (Node*)((__intptr_t)before ^ (__intptr_t)after);
 }
 
+Node* make_new_node(const char *string) {
+    Node *newNode = (Node*) malloc(sizeof(Node));
+    strcpy(newNode -> name, string);
+    
+    return newNode;
+}
+
 // Inserts the string at the beginning of the XOR linked list.
 void insert_string(Node** head, const char* newObj) {
-    
+    Node *newNode = make_new_node(newObj);
+    newNode -> xor_value = calculate_xor_value(NULL, *head);
+
+    // We should only look for the next node if the list isn't empty
+    if (head != NULL) {
+        Node *nextNode = calculate_xor_value(NULL, *head);
+        (*head) -> xor_value = calculate_xor_value(newNode, nextNode);
+    }
+
+    *head = newNode;
 }
 
 // If possible, inserts before the string "before" and returns true. Returns false if not possible (e.g., the before string is not in the list).
 int insert_before(Node** head, const char* before, const char* newObj) {
-    
+    return -1;
 }
 
 // If possible, inserts after the string "after" and returns true. Returns false if not possible (e.g., the after string is not in the list).
