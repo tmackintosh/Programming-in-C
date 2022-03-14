@@ -81,6 +81,7 @@ int insert_before(Node** head, const char* before, const char* newObj) {
 
             return true;
         }
+
         previousNode = currentNode;
         currentNode = nextNode;
     }
@@ -90,7 +91,31 @@ int insert_before(Node** head, const char* before, const char* newObj) {
 
 // If possible, inserts after the string "after" and returns true. Returns false if not possible (e.g., the after string is not in the list).
 int insert_after(Node** head, const char* after, const char* newObj) {
-    return -1;
+    Node *previousNode = NULL;
+    Node *currentNode = *head;
+    Node *nextNode;
+
+    while (currentNode != NULL) {
+        nextNode = calculate_xor_value(previousNode, currentNode -> xor_value);
+
+        if (currentNode -> name == after) {
+            Node *newNode = make_new_node(newObj);
+            currentNode -> xor_value = calculate_xor_value(previousNode, newNode);
+            newNode -> xor_value = calculate_xor_value(currentNode, nextNode);
+
+            if (nextNode != NULL) {
+                Node *nextNextNode = calculate_xor_value(currentNode, nextNode -> xor_value);
+                nextNode -> xor_value = calculate_xor_value(newNode, nextNextNode);
+            }
+
+            return true;
+        }
+
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+
+    return false;
 }
 
 // If possible removes the string at the beginning of the XOR Linked list and returns its value in result. If successful return true, otherwise returns false
@@ -117,8 +142,8 @@ int main () {
     Node *head = NULL;
     insert_string(&head, "Charlie");
     insert_string(&head, "Alpha");
-    insert_before(&head, "Charlie", "Bravo");
-    insert_string(&head, "Alpha");
+    insert_after(&head, "Charlie", "Delta");
+    insert_after(&head, "Alpha", "Bravo");
     print_list(head);
     return 0;
 }
