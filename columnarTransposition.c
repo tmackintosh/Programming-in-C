@@ -204,7 +204,20 @@ void encrypt_columnar(const char *message_filename, const char *key_filename, ch
  *  should return true if decryption was successful, false if not.
  */
 int decrypt_columnar(const char *message_filename, const char *key_filename, char **result) {
+    char *string = read_string(message_filename);
+    char *key = read_string(key_filename);
+
+    // If the length of the string isn't a multiple of the length of the key,
+    // we won't be able to decrypt it.
+    if (strlen(string) % strlen(key) != 0) {
+        return 0;
+    }
+
     encrypt_columnar(message_filename, key_filename, result);
+
+    free(string);
+    free(key);
+
     return 1;
 }
 
