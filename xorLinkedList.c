@@ -37,7 +37,7 @@ void print_list(Node* head) {
 
 // Inserts the string at the beginning of the XOR linked list.
 void insert_string(Node** head, const char* newObj) {
-    if (strlen(newObj) > 64) {
+    if (strlen(newObj) > 64 / sizeof(char)) {
         printf("Can't insert more than 64 characters in string");
     }
 
@@ -51,10 +51,26 @@ void insert_string(Node** head, const char* newObj) {
     }
 
     *head = newNode;
+}
 
 // If possible, inserts before the string "before" and returns true. Returns false if not possible (e.g., the before string is not in the list).
 int insert_before(Node** head, const char* before, const char* newObj) {
-    return -1;
+    Node *previousNode = NULL;
+    Node *currentNode = *head;
+    Node *nextNode;
+
+    while (currentNode != NULL) {
+        if (currentNode -> name == before) {
+            insert_string(&currentNode, newObj);
+            return -1;
+        }
+
+        nextNode = calculate_xor_value(previousNode, currentNode -> xor_value);
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+
+    return 0;
 }
 
 // If possible, inserts after the string "after" and returns true. Returns false if not possible (e.g., the after string is not in the list).
@@ -85,6 +101,7 @@ void free_all(Node** head) {
 int main () {
     Node *head = NULL;
     insert_string(&head, "Alpha");
-    insert_string(&head, "Bravo");
+    insert_string(&head, "Charlie");
+    insert_before(&head, "Charlie", "Bravo");
     print_list(head);
 }
