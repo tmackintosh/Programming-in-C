@@ -120,7 +120,15 @@ int insert_after(Node** head, const char* after, const char* newObj) {
 
 // If possible removes the string at the beginning of the XOR Linked list and returns its value in result. If successful return true, otherwise returns false
 int remove_string(Node** head, char* result) {
-    return -1;
+    strcpy(result, (*head) -> name);
+    
+    Node *newHeadNode = calculate_xor_value(NULL, (*head) -> xor_value);
+    Node *nextNode = calculate_xor_value(*head, newHeadNode -> xor_value);
+    
+    newHeadNode -> xor_value = calculate_xor_value(NULL, nextNode);
+    *head = newHeadNode;
+
+    return 1;
 }
 
 // If possible, removes the string after the string "after" and fills in the result buffer with its value. If successful return true, otherwise returns false
@@ -145,5 +153,12 @@ int main () {
     insert_after(&head, "Charlie", "Delta");
     insert_after(&head, "Alpha", "Bravo");
     print_list(head);
+
+    char result[1024];
+    remove_string(&head, result);
+
+    printf("%s\n", result);
+    print_list(head);
+
     return 0;
 }
