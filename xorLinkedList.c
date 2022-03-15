@@ -148,6 +148,7 @@ int remove_after(Node** head, const char *after, char *result) {
             strcpy(result, nextNode -> name);
 
             currentNode -> xor_value = calculate_xor_value(previousNode, nextNextNode);
+            free(nextNode);
 
             if (nextNextNode != NULL) {
                 Node *nextNextNextNode = calculate_xor_value(nextNode, nextNextNode -> xor_value);
@@ -241,10 +242,18 @@ int main () {
     Node *head = NULL;
     char result[1024];
 
+    insert_string(&head, "Delta");
+    print_list(head);
+    insert_string(&head, "Charlie");
+    print_list(head);
     insert_string(&head, "Bravo");
+    print_list(head);
     insert_before(&head, "Bravo", "Alpha");
+    print_list(head);
     insert_after(&head, "Bravo", "Charlie");
+    print_list(head);
     remove_string(&head, result);
+    print_list(head);
     remove_after(&head, "Bravo", result);
 
     print_list(head);
