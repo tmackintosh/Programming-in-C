@@ -21,6 +21,21 @@ Node* make_new_node(const char *string) {
     return newNode;
 }
 
+void print_list(Node* head) {
+    Node *prev = NULL;
+    Node *curr = head;
+    Node* next;
+
+    while (curr != NULL) {
+        printf("%s -> ", curr -> name);
+        next = calculate_xor_value(prev, curr -> xor_value);
+        prev = curr;
+        curr = next;
+    }
+
+    printf("NULL\n");
+}
+
 // Inserts the string at the beginning of the XOR linked list.
 void insert_string(Node** head, const char* newObj) {
     if (strlen(newObj) > 64 / sizeof(char)) {
@@ -152,7 +167,7 @@ int remove_after(Node** head, const char *after, char *result) {
 
             if (nextNextNode != NULL) {
                 Node *nextNextNextNode = calculate_xor_value(nextNode, nextNextNode -> xor_value);
-                nextNextNode -> xor_value = calculate_xor_value(nextNode, nextNextNextNode);
+                nextNextNode -> xor_value = calculate_xor_value(currentNode, nextNextNextNode);
             }
 
             return true;
@@ -221,21 +236,6 @@ void free_all(Node** head) {
     }
 
     free(previousNode);
-}
-
-void print_list(Node* head) {
-    Node *prev = NULL;
-    Node *curr = head;
-    Node* next;
-
-    while (curr != NULL) {
-        printf("%s -> ", curr -> name);
-        next = calculate_xor_value(prev, curr -> xor_value);
-        prev = curr;
-        curr = next;
-    }
-
-    printf("NULL\n");
 }
 
 int main () {
