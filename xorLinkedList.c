@@ -113,6 +113,8 @@ int remove_string(Node** head, char* result) {
     
     Node *newHeadNode = calculate_xor_value(NULL, (*head) -> xor_value);
     Node *nextNode = calculate_xor_value(*head, newHeadNode -> xor_value);
+
+    free(*head);
     
     newHeadNode -> xor_value = calculate_xor_value(NULL, nextNode);
     *head = newHeadNode;
@@ -129,8 +131,6 @@ int remove_after(Node** head, const char *after, char *result) {
 
     while (currentNode != NULL) {
         nextNode = calculate_xor_value(previousNode, currentNode -> xor_value);
-        previousNode = currentNode;
-        currentNode = nextNode;
 
         if (currentNode == NULL) {
             return false;
@@ -156,6 +156,9 @@ int remove_after(Node** head, const char *after, char *result) {
 
             return true;
         }
+
+        previousNode = currentNode;
+        currentNode = nextNode;
     }
 
     return false;
@@ -171,10 +174,6 @@ int remove_before(Node** head, const char *before, char *result) {
 
     while (currentNode != NULL) {
         nextNode = calculate_xor_value(previousNode, currentNode -> xor_value);
-        previousPreviousPreviousNode = previousPreviousNode;
-        previousPreviousNode = previousNode;
-        previousNode = currentNode;
-        currentNode = nextNode;
 
         if (currentNode == NULL) {
             return false;
@@ -193,6 +192,11 @@ int remove_before(Node** head, const char *before, char *result) {
             free(previousNode);
             return true;
         }
+        
+        previousPreviousPreviousNode = previousPreviousNode;
+        previousPreviousNode = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
     }
 
     return false;
@@ -235,26 +239,16 @@ void print_list(Node* head) {
 
 int main () {
     Node *head = NULL;
-    insert_string(&head, "Charlie");
-    insert_string(&head, "Alpha");
-    insert_after(&head, "Charlie", "Delta");
-    insert_after(&head, "Alpha", "Bravo");
-
     char result[1024];
-    remove_string(&head, result);
-    remove_after(&head, "Charlie", result);
+
+    insert_string(&head, "Bravo");
     insert_before(&head, "Bravo", "Alpha");
-    remove_after(&head, "Bravo", result);
-    remove_before(&head, "Bravo", result);
-    insert_string(&head, "Alpha");
     insert_after(&head, "Bravo", "Charlie");
-    remove_before(&head, "Charlie", result);
+    remove_string(&head, result);
+    remove_after(&head, "Bravo", result);
 
-    printf("%s\n", result);
     print_list(head);
-
     free_all(&head);
-    free(head);
 
     return 0;
 }
