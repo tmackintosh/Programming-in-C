@@ -120,6 +120,10 @@ int insert_after(Node** head, const char* after, const char* newObj) {
 
 // If possible removes the string at the beginning of the XOR Linked list and returns its value in result. If successful return true, otherwise returns false
 int remove_string(Node** head, char* result) {
+    if (*head == NULL) {
+        return false;
+    }
+
     strcpy(result, (*head) -> name);
     
     Node *newHeadNode = calculate_xor_value(NULL, (*head) -> xor_value);
@@ -128,12 +132,42 @@ int remove_string(Node** head, char* result) {
     newHeadNode -> xor_value = calculate_xor_value(NULL, nextNode);
     *head = newHeadNode;
 
-    return 1;
+    return true;
 }
 
 // If possible, removes the string after the string "after" and fills in the result buffer with its value. If successful return true, otherwise returns false
 int remove_after(Node** head, const char *after, char *result) {
-    return -1;
+    Node *previousPreviousNode = NULL;
+    Node *previousNode = NULL;
+    Node *currentNode = *head;
+    Node *nextNode = calculate_xor_value(NULL, currentNode -> xor_value);
+
+    while (currentNode != NULL) {
+        nextNode = calculate_xor_value(previousNode, currentNode -> xor_value);
+        previousPreviousNode = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
+
+        if (currentNode == NULL) {
+            return false;
+        }
+
+        if (previousNode -> name == after) {
+            strcpy(result, currentNode -> name);
+            nextNode = calculate_xor_value(previousNode, currentNode -> xor_value);
+            previousNode -> xor_value = calculate_xor_value(previousPreviousNode, nextNode);
+            
+            if (nextNode != NULL) {
+                Node *nextNextNode = calculate_xor_value(currentNode, nextNode -> xor_value);
+                nextNode -> xor_value = calculate_xor_value(previousNode, nextNextNode);
+            }
+
+            free(currentNode);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // If possible, removes the string before the string "before" and fills in the result buffer with its value. If successful return true, otherwise returns false.
@@ -156,6 +190,9 @@ int main () {
 
     char result[1024];
     remove_string(&head, result);
+    remove_after(&head, "Charlie", result);
+    insert_before(&head, "Bravo", "Alpha");
+    remove_after(&head, "Bravo", result);
 
     printf("%s\n", result);
     print_list(head);
