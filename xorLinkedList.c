@@ -205,6 +205,7 @@ int remove_before(Node** head, const char *before, char *result) {
             previousPreviousNode -> xor_value = calculate_xor_value(previousPreviousPreviousNode, currentNode);
             currentNode -> xor_value = calculate_xor_value(previousPreviousNode, nextNode);
 
+            free(previousNode);
             return true;
         }
     }
